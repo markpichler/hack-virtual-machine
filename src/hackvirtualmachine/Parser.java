@@ -15,7 +15,8 @@ public class Parser {
     public enum CommandType {
         C_ARITHMETIC,
         C_PUSH,
-        C_POP
+        C_POP,
+        NO_COMMAND
     }
 
     public Parser(String fileName) {
@@ -44,7 +45,7 @@ public class Parser {
     }
 
     private void parse() {
-        String[] splitCommand = rawLine.split(" ");
+        String[] splitCommand = rawLine.split("//")[0].trim().split(" ");
         // Assumes lines have only three unique word counts: 3, 2, and 1.
         if (splitCommand.length == 3) {
             if (splitCommand[0].equals("push")) {
@@ -54,11 +55,13 @@ public class Parser {
             }
             arg1 = splitCommand[1];
             arg2 = Integer.parseInt(splitCommand[2]);
-        } else if(splitCommand.length == 2) {
+        } else if (splitCommand.length == 2) {
             // TODO Next Lecture.
-        } else {
+        } else if (splitCommand[0].length() != 0) {
             commandType = CommandType.C_ARITHMETIC;
             arg1 = splitCommand[0];
+        } else {
+            commandType = CommandType.NO_COMMAND;
         }
     }
 

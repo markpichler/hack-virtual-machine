@@ -21,7 +21,7 @@ public class CodeWriter {
     private final String POP =
             "@SP\n" +
             "AM=M-1\n" +
-            "D=M";
+            "D=M\n";
 
     public CodeWriter(String fileName) {
         try {
@@ -37,7 +37,35 @@ public class CodeWriter {
         staticFile = fileName.substring(fileName.lastIndexOf("/") + 1,
                 fileName.length() - 2);
     }
+
+    public void close() {
+        outputFile.close();
+    }
     public void writePushPop(CommandType command, String segment, int index) {
+
+        // TODO Refactor how branch is determined
+        segmentID = segmentList.indexOf(segment);
+
+        switch (segmentID) {
+            case 0:
+                segment = "ARG";
+                break;
+            case 1:
+                segment = "LCL";
+                break;
+            case 2:
+                segment = "THIS";
+                break;
+            case 3:
+                segment = "THAT";
+                break;
+            case 4:
+                segment = index == 0 ? "THIS" : "THAT";
+                break;
+            case 5:
+                segment = "R" + (5 + index);
+        }
+
         switch (command) {
             case C_PUSH:
                 if (segment.equals("constant")) {
@@ -49,42 +77,22 @@ public class CodeWriter {
                                 "D=A\n" +
                                 PUSH + "D");
                     }
+                // TODO Combine Static with Temp and Pointer by pre-processing
+                //      static's segment string.
                 } else if (segment.equals("static")) {
                     outputFile.println(
                             "@" + staticFile + index + "\n" +
                             "D=M\n" +
                             PUSH + "D");
-                } else if (segmentList.contains(segment)) {
 
-                    segmentID = segmentList.indexOf(segment);
-
-                    switch (segmentID) {
-                        case 0:
-                            segment = "ARG";
-                            break;
-                        case 1:
-                            segment = "LCL";
-                            break;
-                        case 2:
-                            segment = "THIS";
-                            break;
-                        case 3:
-                            segment = "THAT";
-                            break;
-                        case 4:
-                            segment = index == 0 ? "THIS" : "THAT";
-                            break;
-                        case 5:
-                            segment = "R" + (5 + index);
-                    }
-
-                    // Temp and Pointer give exact address to access.
-                    if (segmentID == 5 || segmentID == 4) {
-                        outputFile.println(
-                                "@" + segment + "\n" +
-                                "D=M\n" +
-                                PUSH + "D");
-                    } else if (index == 0) {
+                // Temp and Pointer give exact address to access.
+                } else if (segmentID == 5 || segmentID == 4) {
+                    outputFile.println(
+                            "@" + segment + "\n" +
+                            "D=M\n" +
+                            PUSH + "D");
+                } else {
+                    if (index == 0) {
                         outputFile.println(
                                 "@" + segment + "\n" +
                                 "A=M\n" +
@@ -108,7 +116,43 @@ public class CodeWriter {
                 }
                 break;
             case C_POP:
+                // TODO Combine Static with Temp and Pointer by pre-processing
+                //      static's segment string.
+                if (segment.equals("static")) {
+                    outputFile.println(
+                            POP +
+                            "@" + staticFile + index + "\n" +
+                            "M=D");
+                // Temp and Pointer give exact address to access.
+                } else if (segmentID == 5 || segmentID == 4) {
+                    outputFile.println(
+                            POP +
+                            "@" + segment + "\n" +
+                            "M=D");
+                } else {
+                    if (index == 0) {
+                        outputFile.println(
+                                POP +
+                                "@" + segment + "\n" +
+                                "A=M\n" +
+                                "M=D");
+                    } else if (index == 1) {
+                        outputFile.println(
+                                POP +
+                                "@" + segment + "\n" +
+                                "A=M+1\n" +
+                                "M=D");
+                    } else {
+                        outputFile.println(
+                                POP +
+                                "@" + index + "\n" +
+                                "D=A\n" +
+                                "@" + segment + "\n" +
+                                "A=M+D\n" +
+                                "M=D");
+                    }
+                }
+                break;
         }
-
     }
 }

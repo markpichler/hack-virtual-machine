@@ -1,4 +1,5 @@
 /out/
 /.idea/
 /src/hackvirtualmachine/*.asm
+/src/hackvirtualmachine/*.vm
 Hack_Virtual_Machine.iml

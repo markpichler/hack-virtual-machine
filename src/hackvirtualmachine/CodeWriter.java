@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-
 import hackvirtualmachine.Parser.CommandType;
 
 public class CodeWriter {
@@ -21,9 +20,27 @@ public class CodeWriter {
     private final String POP =
             "@SP\n" +
             "AM=M-1\n" +
+            "D=M\n" +
+            "@R13\n" +
+            "M=D\n";
+    private final String GRAB_TEMP =
+            "@R13\n" +
             "D=M\n";
+    private final String ADD =
+            "@SP\n" +
+            "AM=M-1\n" +
+            "D=M\n" +
+            "A=A-1\n" +
+            "M=M+D";
+    private final String SUB =
+            "@SP\n" +
+            "AM=M-1\n" +
+            "D=M\n" +
+            "A=A-1\n" +
+            "M=M-D";
 
     public CodeWriter(String fileName) {
+        // Assumes NON-Windows filepath format
         try {
             outputFile = new PrintWriter(fileName.substring(0,
                     fileName.lastIndexOf(".")) + ".asm");
@@ -39,6 +56,10 @@ public class CodeWriter {
     }
 
     public void close() {
+        outputFile.println(
+                "(END)\n" +
+                "@END\n" +
+                "0;JMP");
         outputFile.close();
     }
     public void writePushPop(CommandType command, String segment, int index) {
@@ -121,24 +142,28 @@ public class CodeWriter {
                 if (segment.equals("static")) {
                     outputFile.println(
                             POP +
+                            GRAB_TEMP +
                             "@" + staticFile + index + "\n" +
                             "M=D");
                 // Temp and Pointer give exact address to access.
                 } else if (segmentID == 5 || segmentID == 4) {
                     outputFile.println(
                             POP +
+                            GRAB_TEMP +
                             "@" + segment + "\n" +
                             "M=D");
                 } else {
                     if (index == 0) {
                         outputFile.println(
                                 POP +
+                                GRAB_TEMP +
                                 "@" + segment + "\n" +
                                 "A=M\n" +
                                 "M=D");
                     } else if (index == 1) {
                         outputFile.println(
                                 POP +
+                                GRAB_TEMP +
                                 "@" + segment + "\n" +
                                 "A=M+1\n" +
                                 "M=D");
@@ -148,10 +173,25 @@ public class CodeWriter {
                                 "@" + index + "\n" +
                                 "D=A\n" +
                                 "@" + segment + "\n" +
-                                "A=M+D\n" +
+                                "D=M+D\n" +
+                                "@R14\n" +
+                                "M=D\n" +
+                                GRAB_TEMP +
+                                "@R14\n" +
+                                "A=M\n" +
                                 "M=D");
                     }
                 }
+                break;
+        }
+    }
+    public void writeArithmetic(String command) {
+        switch (command) {
+            case "add":
+                outputFile.println(ADD);
+                break;
+            case "sub":
+                outputFile.println(SUB);
                 break;
         }
     }

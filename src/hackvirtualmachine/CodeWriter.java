@@ -6,9 +6,15 @@ import java.util.Arrays;
 import java.util.List;
 import hackvirtualmachine.Parser.CommandType;
 
+/**
+ * A CodeWriter that translates parsed Hack VM code to Hack assembly code and
+ * writes the translated code to a file.
+ *
+ * @author Mark Pichler
+ */
 public class CodeWriter {
 
-    // TODO Look into how StringBuilder can speed things up
+    // TODO Look into how StringBuilder can possibly speed things up
 
     private PrintWriter outputFile;
     private List<String> segmentList;
@@ -40,6 +46,14 @@ public class CodeWriter {
             "A=M-1\n" +
             "M=";
 
+    /**
+     * Creates a new CodeWriter.  Initializes a new PrintWriter (outputFile)
+     * and parses the name of the file from its full path and extension.
+     * Assumes the output file and location are the same as the original VM
+     * code file.
+     *
+     * @param fileName full path of output file
+     */
     public CodeWriter(String fileName) {
         // Assumes NON-Windows filepath format
         try {
@@ -56,6 +70,10 @@ public class CodeWriter {
                 fileName.length() - 2);
     }
 
+    /**
+     * Appends an infinite loop at the end of the ASM file to prevent NOP
+     * slides.  Closes the PrintWriter.
+     */
     public void close() {
         outputFile.println(
                 "(END)\n" +
@@ -63,6 +81,14 @@ public class CodeWriter {
                 "0;JMP");
         outputFile.close();
     }
+
+    /**
+     * Manages the translation of Push and Pop commands.
+     *
+     * @param command type of command to be translated
+     * @param segment memory segment to be operated on
+     * @param index memory offset of segment
+     */
     public void writePushPop(CommandType command, String segment, int index) {
 
         // TODO Refactor how branch is determined
@@ -186,6 +212,12 @@ public class CodeWriter {
                 break;
         }
     }
+
+    /**
+     * Manages the translation of Hack VM arithmetic and logical commands.
+     *
+     * @param command VM arithmetic or logical command to be translated
+     */
     public void writeArithmetic(String command) {
         command = command.toUpperCase();
         switch (command) {

@@ -37,7 +37,7 @@ public class VMTranslator {
     }
 
     public static void main(String[] args) {
-        VMTranslator vmTranslator = new VMTranslator("C:/Users/Mark/IdeaProjects/Hack_Virtual_Machine/src/hackvirtualmachine/BasicTest.vm");
+        VMTranslator vmTranslator = new VMTranslator(args[0]);
         vmTranslator.start();
     }
 }

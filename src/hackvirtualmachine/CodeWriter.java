@@ -8,10 +8,13 @@ import hackvirtualmachine.Parser.CommandType;
 
 public class CodeWriter {
 
+    // TODO Look into how StringBuilder can speed things up
+
     private PrintWriter outputFile;
     private List<String> segmentList;
     private int segmentID;
     private String staticFile;
+    private int logicalCount;
     private final String PUSH =
             "@SP\n" +
             "AM=M+1\n" +
@@ -26,18 +29,16 @@ public class CodeWriter {
     private final String GRAB_TEMP =
             "@R13\n" +
             "D=M\n";
-    private final String ADD =
+    private final String BINARY_OP =
             "@SP\n" +
             "AM=M-1\n" +
             "D=M\n" +
             "A=A-1\n" +
-            "M=M+D";
-    private final String SUB =
+            "M=M";
+    private final String UNARY_OP =
             "@SP\n" +
-            "AM=M-1\n" +
-            "D=M\n" +
-            "A=A-1\n" +
-            "M=M-D";
+            "A=M-1\n" +
+            "M=";
 
     public CodeWriter(String fileName) {
         // Assumes NON-Windows filepath format
@@ -48,7 +49,7 @@ public class CodeWriter {
             e.printStackTrace();
             System.exit(0);
         }
-
+        logicalCount = 0;
         segmentList = Arrays.asList("argument", "local", "this", "that",
                 "pointer", "temp", "static");
         staticFile = fileName.substring(fileName.lastIndexOf("/") + 1,
@@ -186,12 +187,46 @@ public class CodeWriter {
         }
     }
     public void writeArithmetic(String command) {
+        command = command.toUpperCase();
         switch (command) {
-            case "add":
-                outputFile.println(ADD);
+            case "ADD":
+                outputFile.println(BINARY_OP + "+D");
                 break;
-            case "sub":
-                outputFile.println(SUB);
+            case "SUB":
+                outputFile.println(BINARY_OP + "-D");
+                break;
+            case "AND":
+                outputFile.println(BINARY_OP + "&D");
+                break;
+            case "OR":
+                outputFile.println(BINARY_OP + "|D");
+                break;
+            case "NEG":
+                outputFile.println(UNARY_OP + "-M");
+                break;
+            case "NOT":
+                outputFile.println(UNARY_OP + "!M");
+                break;
+            // TODO TURN INTO SUB ROUTINE. TOO MUCH REPEATED CODE
+            default:
+                outputFile.println(
+                        "@SP\n" +
+                        "AM=M-1\n" +
+                        "D=M\n" +
+                        "A=A-1\n" +
+                        "D=M-D\n" +
+                        "@" + command + logicalCount + "\n" +
+                        "D;J" + command + "\n" +
+                        "D=0\n" +
+                        "@END" + logicalCount + "\n" +
+                        "0;JMP\n" +
+                        "(" + command + logicalCount + ")\n" +
+                        "D=-1\n" +
+                        "(END" + logicalCount + ")\n" +
+                        "@SP\n" +
+                        "A=M-1\n" +
+                        "M=D");
+                logicalCount++;
                 break;
         }
     }

@@ -383,4 +383,64 @@ public class CodeWriter {
                 "0;JMP"
         );
     }
+
+    /**
+     * Manages the translation of Hack VM call commands.  This task entails
+     * saving return address (the address right after the call command was
+     * made), the values of LCL, ARG, THIS, and THAT, and setting the ARG
+     * pointer to the SP memory address before the call was made minus
+     * numArgs.
+     *
+     * @param functionName name of function to call
+     * @param numArgs number of arguments to pass to function
+     */
+    public void writeCall(String functionName, int numArgs) {
+        // Save the return address and increment SP
+        outputFile.println(
+                "@RETURN" + logicalCount + "\n" +
+                "D=A\n" +
+                PUSH + "D"
+        );
+        // Save current LCL address and increment SP
+        outputFile.println(
+                "@LCL\n" +
+                "D=M\n" +
+                PUSH + "D"
+        );
+        // Save current ARG address and increment SP
+        outputFile.println(
+                "@ARG\n" +
+                "D=M\n" +
+                PUSH + "D"
+        );
+        // Save current THIS address and increment SP
+        outputFile.println(
+                "@THIS\n" +
+                "D=M\n" +
+                PUSH + "D"
+        );
+        // Save current THAT address and increment SP
+        outputFile.println(
+                "@THAT\n" +
+                "D=M\n" +
+                PUSH + "D"
+        );
+
+        // Set ARG pointer to SP - (5 + numArgs)
+        outputFile.println(
+                "@" + (5 + numArgs) + "\n" +
+                "D=A\n" +
+                "@SP\n" +
+                "D=M-D\n" +
+                "@ARG\n" +
+                "M=D"
+        );
+
+        // Write goto function
+        writeGoto(functionName);
+
+        // Write return address label
+        writeLabel("RETURN" + logicalCount);
+        logicalCount++;
+    }
 }

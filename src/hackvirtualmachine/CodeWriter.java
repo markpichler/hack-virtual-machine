@@ -262,4 +262,13 @@ public class CodeWriter {
                 break;
         }
     }
+
+    /**
+     * Manages the translation of Hack VM label commands.
+     *
+     * @param label name of label to be translated
+     */
+    public void writeLabel(String label) {
+        outputFile.println("(" + label + ")");
+    }
 }

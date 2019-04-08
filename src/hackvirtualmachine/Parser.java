@@ -23,6 +23,7 @@ public class Parser {
         C_ARITHMETIC,
         C_PUSH,
         C_POP,
+        C_LABEL,
         NO_COMMAND
     }
 
@@ -84,7 +85,10 @@ public class Parser {
             arg1 = splitCommand[1];
             arg2 = Integer.parseInt(splitCommand[2]);
         } else if (splitCommand.length == 2) {
-            // TODO Next Lecture.
+            if (splitCommand[0].equals("label")) {
+                commandType = CommandType.C_LABEL;
+            }
+            arg1 = splitCommand[1];
         } else if (splitCommand[0].length() != 0) {
             commandType = CommandType.C_ARITHMETIC;
             arg1 = splitCommand[0];

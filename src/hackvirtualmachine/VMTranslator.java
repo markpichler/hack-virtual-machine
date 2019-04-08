@@ -45,6 +45,9 @@ public class VMTranslator {
                     break;
                 case C_ARITHMETIC:
                     codeWriter.writeArithmetic(arg1);
+                    break;
+                case C_LABEL:
+                    codeWriter.writeLabel(arg1);
             }
         }
         codeWriter.close();

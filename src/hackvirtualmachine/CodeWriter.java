@@ -293,6 +293,6 @@ public class CodeWriter {
                 "@SP\n" +
                 "D=M\n" +
                 "@" + label + "\n" +
-                "D;JLT");
+                "D;JNE");
     }
 }

@@ -280,7 +280,8 @@ public class CodeWriter {
     public void writeGoto(String label) {
         outputFile.println(
                 "@" + label + "\n" +
-                "0;JMP");
+                "0;JMP"
+        );
     }
 
     /**
@@ -294,5 +295,26 @@ public class CodeWriter {
                 "D=M\n" +
                 "@" + label + "\n" +
                 "D;JNE");
+    }
+
+    /**
+     * Manages the translation of Hack VM function commands.  This task entails
+     * creating a unique function label, pushing numVars 0's onto the stack,
+     * and setting the LCL pointer to the beginning of that sequence of zeros.
+     *
+     * @param functionName name of function
+     * @param numVars number of arguments the function can receive
+     */
+    public void writeFunction(String functionName, int numVars) {
+        writeLabel(functionName);
+        outputFile.println(
+                "@SP\n" +
+                "D=M\n" +
+                "@LCL\n" +
+                "M=D"
+        );
+        for (int i = 1; i <= numVars; i++) {
+            writePushPop(CommandType.C_PUSH, "constant", 0);
+        }
     }
 }

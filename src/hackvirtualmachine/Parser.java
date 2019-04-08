@@ -26,6 +26,7 @@ public class Parser {
         C_LABEL,
         C_GOTO,
         C_IF,
+        C_FUNCTION,
         NO_COMMAND
     }
 
@@ -83,6 +84,8 @@ public class Parser {
                 commandType = CommandType.C_PUSH;
             } else if (splitCommand[0].equals("pop")) {
                 commandType = CommandType.C_POP;
+            } else if (splitCommand[0].equals("function")) {
+                commandType = CommandType.C_FUNCTION;
             }
             arg1 = splitCommand[1];
             arg2 = Integer.parseInt(splitCommand[2]);

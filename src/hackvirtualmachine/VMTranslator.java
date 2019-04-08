@@ -55,6 +55,9 @@ public class VMTranslator {
                 case C_IF:
                     codeWriter.writeIf(arg1);
                     break;
+                case C_FUNCTION:
+                    codeWriter.writeFunction(arg1, arg2);
+                    break;
             }
         }
         codeWriter.close();

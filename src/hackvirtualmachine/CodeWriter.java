@@ -282,4 +282,17 @@ public class CodeWriter {
                 "@" + label + "\n" +
                 "0;JMP");
     }
+
+    /**
+     * Manages the translation of Hack VM if-goto commands.
+     *
+     * @param label name of label to go to if condition is met
+     */
+    public void writeIf(String label) {
+        outputFile.println(
+                "@SP\n" +
+                "D=M\n" +
+                "@" + label + "\n" +
+                "D;JLT");
+    }
 }

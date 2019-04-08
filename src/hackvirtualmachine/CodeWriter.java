@@ -317,4 +317,70 @@ public class CodeWriter {
             writePushPop(CommandType.C_PUSH, "constant", 0);
         }
     }
+
+    /**
+     * Manages the translation of Hack VM return commands.  This task entails
+     * popping the most recent value to ARG[0] (the return value), resetting
+     * the LCL, ARG, THIS, and THAT pointers to their values in the prior stack
+     * frame, and writing a jump to the address just after the call command in
+     * the caller function.
+     */
+    public void writeReturn() {
+        // Write return value to ARG[0]
+        writePushPop(CommandType.C_POP, "argument", 0);
+        // Set SP to ARG[1]
+        outputFile.println(
+                "@ARG\n" +
+                "D=M+1\n" +
+                "@SP\n" +
+                "M=D"
+        );
+        // Reset THAT pointer and decrement LCL
+        outputFile.println(
+                "@LCL\n" +
+                "AM=M-1\n" +
+                "D=M\n" +
+                "@THAT\n" +
+                "M=D"
+        );
+        // Reset THIS pointer and decrement LCL
+        outputFile.println(
+                "@LCL\n" +
+                "AM=M-1\n" +
+                "D=M\n" +
+                "@THIS\n" +
+                "M=D"
+        );
+        // Reset ARG pointer and decrement LCL
+        outputFile.println(
+                "@LCL\n" +
+                "AM=M-1\n" +
+                "D=M\n" +
+                "@ARG\n" +
+                "M=D"
+        );
+        // Save return address to temp R13 before resetting LCL
+        outputFile.println(
+                "@LCL\n" +
+                "A=M-1\n" +
+                "A=A-1\n" +
+                "D=M\n" +
+                "@R13\n" +
+                "M=D"
+        );
+        // Reset LCL pointer
+        outputFile.println(
+                "@LCL\n" +
+                "A=M-1\n" +
+                "D=M\n" +
+                "@LCL\n" +
+                "M=D"
+        );
+        // Write a jump command to go back to the return address
+        outputFile.println(
+                "@R13\n" +
+                "A=M\n" +
+                "0;JMP"
+        );
+    }
 }

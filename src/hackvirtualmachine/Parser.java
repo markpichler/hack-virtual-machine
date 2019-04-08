@@ -27,6 +27,7 @@ public class Parser {
         C_GOTO,
         C_IF,
         C_FUNCTION,
+        C_RETURN,
         NO_COMMAND
     }
 
@@ -99,7 +100,11 @@ public class Parser {
             }
             arg1 = splitCommand[1];
         } else if (splitCommand[0].length() != 0) {
-            commandType = CommandType.C_ARITHMETIC;
+            if (splitCommand[0].equals("return")) {
+                commandType = CommandType.C_RETURN;
+            } else {
+                commandType = CommandType.C_ARITHMETIC;
+            }
             arg1 = splitCommand[0];
         } else {
             commandType = CommandType.NO_COMMAND;

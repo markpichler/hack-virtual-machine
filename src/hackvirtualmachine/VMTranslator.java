@@ -48,6 +48,10 @@ public class VMTranslator {
                     break;
                 case C_LABEL:
                     codeWriter.writeLabel(arg1);
+                    break;
+                case C_GOTO:
+                    codeWriter.writeGoto(arg1);
+                    break;
             }
         }
         codeWriter.close();

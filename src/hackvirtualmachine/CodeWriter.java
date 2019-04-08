@@ -271,4 +271,15 @@ public class CodeWriter {
     public void writeLabel(String label) {
         outputFile.println("(" + label + ")");
     }
+
+    /**
+     * Manages the translation of Hack VM goto commands.
+     *
+     * @param label name of label to go to
+     */
+    public void writeGoto(String label) {
+        outputFile.println(
+                "@" + label + "\n" +
+                "0;JMP");
+    }
 }

@@ -24,6 +24,7 @@ public class Parser {
         C_PUSH,
         C_POP,
         C_LABEL,
+        C_GOTO,
         NO_COMMAND
     }
 
@@ -87,6 +88,8 @@ public class Parser {
         } else if (splitCommand.length == 2) {
             if (splitCommand[0].equals("label")) {
                 commandType = CommandType.C_LABEL;
+            } else if (splitCommand[0].equals("goto")) {
+                commandType = CommandType.C_GOTO;
             }
             arg1 = splitCommand[1];
         } else if (splitCommand[0].length() != 0) {

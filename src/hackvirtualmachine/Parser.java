@@ -77,6 +77,8 @@ public class Parser {
      * indices are stored in arg2.
      */
     private void parse() {
+        // TODO BUGFIX! parse() cannot handle .vm comments with no characters
+        //  after "//"
         String[] splitCommand = rawLine.split("//")[0].trim().split(
                 " ");
         // Assumes lines have only three unique word counts: 3, 2, and 1.

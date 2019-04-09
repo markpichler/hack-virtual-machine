@@ -96,6 +96,20 @@ public class CodeWriter {
     }
 
     /**
+     * Writes the bootstrap assembly code to the beginning of every translated
+     * program.
+     */
+    public void writeInit() {
+        outputFile.println(
+                "@256\n" +
+                "D=A\n" +
+                "@SP\n" +
+                "M=D"
+        );
+        writeCall("Sys.init", 0);
+    }
+
+    /**
      * Manages the translation of Push and Pop commands.
      *
      * @param command type of command to be translated

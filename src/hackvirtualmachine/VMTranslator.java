@@ -7,6 +7,9 @@ import hackvirtualmachine.Parser.CommandType;
  *
  * @author Mark Pichler
  */
+
+// TODO Add ability to take in a directory and translate all of the .vm files
+//      within and name the output .asm file the same name as the directory.
 public class VMTranslator {
 
     private Parser parser;
@@ -36,6 +39,9 @@ public class VMTranslator {
      * in the same folder as the input VM file after calling this method.
      */
     public void start() {
+
+        // Write initial bootstrap code
+        codeWriter.writeInit();
 
         while (true) {
 

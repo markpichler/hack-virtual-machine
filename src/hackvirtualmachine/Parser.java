@@ -56,7 +56,6 @@ public class Parser {
         if (inputFile.hasNextLine()) {
             return true;
         } else {
-            inputFile.close();
             return false;
         }
     }

@@ -21,6 +21,7 @@ public class CodeWriter {
     private int segmentID;
     private String staticFile;
     private int logicalCount;
+    private int returnCount;
     private final String PUSH =
             "@SP\n" +
             "AM=M+1\n" +
@@ -64,8 +65,20 @@ public class CodeWriter {
             System.exit(0);
         }
         logicalCount = 0;
+        returnCount = 0;
         segmentList = Arrays.asList("argument", "local", "this", "that",
                 "pointer", "temp", "static");
+        staticFile = fileName.substring(fileName.lastIndexOf("/") + 1,
+                fileName.length() - 2);
+    }
+
+    /**
+     * Sets the staticFile variable to the current file name the VM Translator
+     * is processing.
+     *
+     * @param fileName full path of current file being translated
+     */
+    public void setFileName(String fileName) {
         staticFile = fileName.substring(fileName.lastIndexOf("/") + 1,
                 fileName.length() - 2);
     }
@@ -292,6 +305,7 @@ public class CodeWriter {
     public void writeIf(String label) {
         outputFile.println(
                 "@SP\n" +
+                "AM=M-1\n" +
                 "D=M\n" +
                 "@" + label + "\n" +
                 "D;JNE");
@@ -326,8 +340,24 @@ public class CodeWriter {
      * the caller function.
      */
     public void writeReturn() {
+        // TODO Figure out why this only works when return address is saved
+        //      first.
+
+        // Save return address to temp R14
+        outputFile.println(
+                "@5\n" +
+                "D=A\n" +
+                "@LCL\n" +
+                "D=M-D\n" +
+                "A=D\n" +
+                "D=M\n" +
+                "@R14\n" +
+                "M=D"
+        );
+
         // Write return value to ARG[0]
         writePushPop(CommandType.C_POP, "argument", 0);
+
         // Set SP to ARG[1]
         outputFile.println(
                 "@ARG\n" +
@@ -335,6 +365,7 @@ public class CodeWriter {
                 "@SP\n" +
                 "M=D"
         );
+
         // Reset THAT pointer and decrement LCL
         outputFile.println(
                 "@LCL\n" +
@@ -359,15 +390,7 @@ public class CodeWriter {
                 "@ARG\n" +
                 "M=D"
         );
-        // Save return address to temp R13 before resetting LCL
-        outputFile.println(
-                "@LCL\n" +
-                "A=M-1\n" +
-                "A=A-1\n" +
-                "D=M\n" +
-                "@R13\n" +
-                "M=D"
-        );
+
         // Reset LCL pointer
         outputFile.println(
                 "@LCL\n" +
@@ -378,10 +401,11 @@ public class CodeWriter {
         );
         // Write a jump command to go back to the return address
         outputFile.println(
-                "@R13\n" +
+                "@R14\n" +
                 "A=M\n" +
                 "0;JMP"
         );
+
     }
 
     /**
@@ -397,7 +421,7 @@ public class CodeWriter {
     public void writeCall(String functionName, int numArgs) {
         // Save the return address and increment SP
         outputFile.println(
-                "@RETURN" + logicalCount + "\n" +
+                "@RETURN" + returnCount + "\n" +
                 "D=A\n" +
                 PUSH + "D"
         );
@@ -440,7 +464,7 @@ public class CodeWriter {
         writeGoto(functionName);
 
         // Write return address label
-        writeLabel("RETURN" + logicalCount);
-        logicalCount++;
+        writeLabel("RETURN" + returnCount);
+        returnCount++;
     }
 }

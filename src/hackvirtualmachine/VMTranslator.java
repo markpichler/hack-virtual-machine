@@ -14,15 +14,21 @@ public class VMTranslator {
     private CommandType commandType;
     private String arg1;
     private int arg2;
+    private String[] fileNames;
+    private int fileCount;
+    private int currFile;
 
     /**
      * Initializes the Parser and CodeWriter.
      *
-     * @param fileName Full path of VM file
+     * @param fileNames array of full path VM file names
      */
-    public VMTranslator(String fileName) {
-        parser = new Parser(fileName);
-        codeWriter = new CodeWriter(fileName);
+    public VMTranslator(String[] fileNames) {
+        this.fileNames = fileNames;
+        fileCount = fileNames.length;
+        currFile = 1;
+        parser = new Parser(fileNames[0]);
+        codeWriter = new CodeWriter(fileNames[0]);
     }
 
     /**
@@ -31,7 +37,15 @@ public class VMTranslator {
      */
     public void start() {
 
-        while (parser.hasMoreCommands()) {
+        while (true) {
+
+            if (!parser.hasMoreCommands() && currFile < fileCount) {
+                parser = new Parser(fileNames[currFile]);
+                codeWriter.setFileName(fileNames[currFile]);
+                currFile++;
+            } else if (!parser.hasMoreCommands()) {
+                break;
+            }
 
             parser.advance();
             commandType = parser.getCommandType();
@@ -74,7 +88,7 @@ public class VMTranslator {
      * @param args
      */
     public static void main(String[] args) {
-        VMTranslator vmTranslator = new VMTranslator(args[0]);
+        VMTranslator vmTranslator = new VMTranslator(args);
         vmTranslator.start();
     }
 }
